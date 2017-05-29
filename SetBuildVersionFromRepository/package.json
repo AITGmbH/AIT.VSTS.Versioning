@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "vsts-task-lib": "^2.0.2-preview"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.12"
+  }
+}
