@@ -4,7 +4,7 @@
 
 # First time
 npm install -g tfx
-npm install -g tsc
+npm install -g typescript
 cd SetBuildVersionFromRepository && npm install && cd ../SetBuildVersionFromArtifact && npm install && cd ..
 
 # create new version
