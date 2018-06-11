@@ -3,7 +3,7 @@
 ```shell
 
 # First time
-npm install -g tfx
+npm install -g tfx-cli
 npm install -g typescript
 cd SetBuildVersionFromRepository && npm install && cd ../SetBuildVersionFromArtifact && npm install && cd ..
 
