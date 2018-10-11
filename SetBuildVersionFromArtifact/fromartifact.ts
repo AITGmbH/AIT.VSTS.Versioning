@@ -10,7 +10,7 @@ function addBuildTag(name) {
 
 function setBuildVariable(variable, value) {
   tl.setVariable(variable, value);
-  //console.log("##vso[task.setvariable variable=%s;]%s", variable, name);
+  //console.log("##vso[task.setvariable variable=%s;]%s", variable, value);
   process.env[variable] = value;
 }
 

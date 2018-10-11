@@ -9,7 +9,7 @@
     "version": {
         "Major": 0,
         "Minor": 2,
-        "Patch": 0
+        "Patch": 12
     },
     "instanceNameFormat": "Read version from $(versionTextFile)",
     "groups": [
@@ -66,6 +66,15 @@
             "defaultValue": "ProjectVersion_Patch",
             "required": false,
             "helpMarkDown": "We will save the version part in a Azure-DevOps variable as well as in an environment variable with the same name.",
+            "groupName": "variables"
+        },
+        {
+            "name": "maxPatchVersion",
+            "type": "string",
+            "label": "highest admissible pact number (otherwise wrap around)",
+            "defaultValue": "65535",
+            "required": false,
+            "helpMarkDown": "We will wrap-around the the patch part when the maximum number gets passed.",
             "groupName": "variables"
         },
         {

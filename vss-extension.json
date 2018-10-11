@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "matthid-semver-build-task",
     "name": "AIT SemVer Build Tools",
-    "version": "0.2.0",
+    "version": "0.2.12",
     "publisher": "matthid",
     "targets": [
         {
