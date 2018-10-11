@@ -1,4 +1,3 @@
-
 "use strict";
 
 import * as tl from "vsts-task-lib/task";
@@ -11,7 +10,7 @@ function setBuildName(name) {
 
 function setBuildVariable(variable, value) {
   tl.setVariable(variable, value);
-  //console.log("##vso[task.setvariable variable=%s;]%s", variable, name);
+  //console.log("##vso[task.setvariable variable=%s;]%s", variable, value);
   process.env[variable] = value;
 }
 
@@ -19,22 +18,6 @@ function exitWithError(message, exitCode) {
   tl.error(message);
   tl.setResult(tl.TaskResult.Failed, message);
   process.exit(exitCode);
-}
-
-// http://stackoverflow.com/a/2998822/1269722
-function pad(num, size) {
-    var s = num+"";
-    while (s.length < size) s = "0" + s;
-    return s;
-}
-
-// http://stackoverflow.com/a/8619946/1269722
-function getDayOfYear() {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), 0, 0);
-  var diff = now.getTime() - start.getTime();
-  var oneDay = 1000 * 60 * 60 * 24;
-  return Math.floor(diff / oneDay);
 }
 
 tl.cd(tl.getInput("cwd"));
@@ -45,6 +28,7 @@ var generatePatch = tl.getInput("generatePatch", true) == "true";
 var majorVersionVariableName = tl.getInput("majorVersionVariableName");
 var minorVersionVariableName = tl.getInput("minorVersionVariableName");
 var patchVersionVariableName = tl.getInput("patchVersionVariableName");
+var maxPatchVersion = Number.parseInt(tl.getInput("maxPatchVersion"));
 var specialVersionVariableName = tl.getInput("specialVersionVariableName");
 var versionVariableName = tl.getInput("versionVariableName");
 var ciVersionVariableName = tl.getInput("ciVersionVariableName");
@@ -86,20 +70,29 @@ if (buildNumber != null && (buildNumber!="")) {
   externalBuildNumber = buildId;
 }
 
-var patchVersion = "";
+var draft = buildNumber.endsWith(".DRAFT")? ".DRAFT": "";
+
+var unwrappedPatchVersionNumber : number;
 if (generatePatch) {
   if (versionParts.length > 2) {
     exitWithError(`The file ${versionTextFile} is not in the correct format. Expected a file containing something similar to '1.0' (because patch part is generated)`, 1);
   }
 
-  patchVersion = externalBuildNumber;
+  unwrappedPatchVersionNumber = Number.parseInt(externalBuildNumber);
 } else {
   if (versionParts.length < 3 || versionParts.length > 3) {
     exitWithError(`The file ${versionTextFile} is not in the correct format. Expected a file containing something similar to '1.0.0'`, 1);
   }
 
-  patchVersion = versionParts[2].trim();
+  unwrappedPatchVersionNumber = Number.parseInt(versionParts[2].trim());
 }
+
+var unwrappedPatchVersion = unwrappedPatchVersionNumber.toString();
+
+var patchVersionNumber = maxPatchVersion === null || Number.isNaN(maxPatchVersion) ?
+                          unwrappedPatchVersionNumber :
+                          unwrappedPatchVersionNumber % (1 + maxPatchVersion);
+var patchVersion = patchVersionNumber.toString();
 
 setBuildVariable(patchVersionVariableName, patchVersion);
 
@@ -108,10 +101,14 @@ setBuildVariable(specialVersionVariableName, rest);
 var releaseVersion = `${majorVersion}.${minorVersion}.${patchVersion}${rest}`
 var ciVersion = `${majorVersion}.${minorVersion}.${patchVersion}-ci`
 if (generatePatch) {
-  // We are already unique, because of patchVersion
+  // We are already unique if not wrapped around, because of patchVersion
+  if (patchVersionNumber !== unwrappedPatchVersionNumber)
+  {
+    ciVersion = `${ciVersion}-${unwrappedPatchVersion}`
+  }
 } else {
   // We need to improve ciVersion as we might not update the text file on every build
-  ciVersion = `${majorVersion}.${minorVersion}.${patchVersion}-ci-${externalBuildNumber}`
+  ciVersion = `${ciVersion}-${externalBuildNumber}`
 }
 
 setBuildVariable(versionVariableName, releaseVersion);
@@ -133,4 +130,5 @@ let data = {
 
 tl.command("artifact.upload", data, artifactDir);
 
-setBuildName(ciVersion);
+var buildName = `${ciVersion}${draft}`;
+setBuildName(buildName);
