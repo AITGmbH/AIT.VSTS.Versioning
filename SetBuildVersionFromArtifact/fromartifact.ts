@@ -21,14 +21,14 @@ function exitWithError(message, exitCode) {
   process.exit(exitCode);
 }
 
-// http://stackoverflow.com/a/2998822/1269722
+// https://stackoverflow.com/a/2998822/1269722
 function pad(num, size) {
     var s = num+"";
     while (s.length < size) s = "0" + s;
     return s;
 }
 
-// http://stackoverflow.com/a/8619946/1269722
+// https://stackoverflow.com/a/8619946/1269722
 function getDayOfYear() {
   var now = new Date();
   var start = new Date(now.getFullYear(), 0, 0);
@@ -56,7 +56,7 @@ if (artifactAlias == null || artifactAlias == "") {
   tl.getVariables().forEach((item:tl.VariableInfo) => {
     tl.debug(`Variable: '${item.name}' -> '${item.value}'`)
   })
-  var aliases = 
+  var aliases =
     tl.getVariables()
     .filter((variable: tl.VariableInfo) => {
       var lower = variable.name.trim().toLowerCase();
