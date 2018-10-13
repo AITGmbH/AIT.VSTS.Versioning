@@ -45,6 +45,7 @@ var generatePatch = tl.getInput("generatePatch", true) == "true";
 var majorVersionVariableName = tl.getInput("majorVersionVariableName");
 var minorVersionVariableName = tl.getInput("minorVersionVariableName");
 var patchVersionVariableName = tl.getInput("patchVersionVariableName");
+var maxPatchVersion = Number.parseInt(tl.getInput("maxPatchVersion"));
 var specialVersionVariableName = tl.getInput("specialVersionVariableName");
 var versionVariableName = tl.getInput("versionVariableName");
 var ciVersionVariableName = tl.getInput("ciVersionVariableName");
@@ -86,20 +87,29 @@ if (buildNumber != null && (buildNumber!="")) {
   externalBuildNumber = buildId;
 }
 
-var patchVersion = "";
+var draft = buildNumber.endsWith(".DRAFT")? ".DRAFT": "";
+
+var unwrappedPatchVersionNumber : number;
 if (generatePatch) {
   if (versionParts.length > 2) {
     exitWithError(`The file ${versionTextFile} is not in the correct format. Expected a file containing something similar to '1.0' (because patch part is generated)`, 1);
   }
 
-  patchVersion = externalBuildNumber;
+  unwrappedPatchVersionNumber = Number.parseInt(externalBuildNumber);
 } else {
   if (versionParts.length < 3 || versionParts.length > 3) {
     exitWithError(`The file ${versionTextFile} is not in the correct format. Expected a file containing something similar to '1.0.0'`, 1);
   }
 
-  patchVersion = versionParts[2].trim();
+  unwrappedPatchVersionNumber = Number.parseInt(versionParts[2].trim());
 }
+
+var unwrappedPatchVersion = unwrappedPatchVersionNumber.toString();
+
+var patchVersionNumber = maxPatchVersion === null || Number.isNaN(maxPatchVersion) ?
+                          unwrappedPatchVersionNumber :
+                          unwrappedPatchVersionNumber % (1 + maxPatchVersion);
+var patchVersion = patchVersionNumber.toString();
 
 setBuildVariable(patchVersionVariableName, patchVersion);
 
@@ -108,10 +118,14 @@ setBuildVariable(specialVersionVariableName, rest);
 var releaseVersion = `${majorVersion}.${minorVersion}.${patchVersion}${rest}`
 var ciVersion = `${majorVersion}.${minorVersion}.${patchVersion}-ci`
 if (generatePatch) {
-  // We are already unique, because of patchVersion
+  // We are already unique if not wrapped around, because of patchVersion
+  if (patchVersionNumber !== unwrappedPatchVersionNumber)
+  {
+    ciVersion = `${ciVersion}-${unwrappedPatchVersion}`
+  }
 } else {
   // We need to improve ciVersion as we might not update the text file on every build
-  ciVersion = `${majorVersion}.${minorVersion}.${patchVersion}-ci-${externalBuildNumber}`
+  ciVersion = `${ciVersion}-${externalBuildNumber}`
 }
 
 setBuildVariable(versionVariableName, releaseVersion);
@@ -133,4 +147,5 @@ let data = {
 
 tl.command("artifact.upload", data, artifactDir);
 
-setBuildName(ciVersion);
+var buildName = `${ciVersion}${draft}`;
+setBuildName(buildName);
