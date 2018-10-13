@@ -9,7 +9,7 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
-    "description": "Tools for using version numbers as specified by https://semver.org/ in your release pipeline. Allows to manage your version number from within your repository. Includes several build and release tasks.",
+    "description": "Tools for using version numbers as specified by https://semver.org/ in your release pipeline. Allows to manage your version number from within your repository. Includes build and release tasks.",
     "categories": [
         "Build and release"
     ],
