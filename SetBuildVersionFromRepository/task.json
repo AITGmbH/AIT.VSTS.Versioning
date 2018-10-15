@@ -9,7 +9,7 @@
     "version": {
         "Major": 0,
         "Minor": 2,
-        "Patch": 13
+        "Patch": 14
     },
     "instanceNameFormat": "Read version from $(versionTextFile)",
     "groups": [
@@ -71,10 +71,10 @@
         {
             "name": "maxPatchVersion",
             "type": "string",
-            "label": "highest admissible pact number (otherwise wrap around)",
-            "defaultValue": "65535",
+            "label": "highest allowed patch number (otherwise wrap around)",
+            "defaultValue": "",
             "required": false,
-            "helpMarkDown": "We will wrap-around the the patch part when the maximum number gets passed.",
+            "helpMarkDown": "We will wrap-around the the patch part when the maximum number gets passed. Calculates and uses 'patchnumber % (maxPatchVersion + 1)'",
             "groupName": "variables"
         },
         {
