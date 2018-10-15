@@ -21,15 +21,15 @@ function exitWithError(message, exitCode) {
 tl.cd(tl.getInput("cwd"));
 
 // read inputs
-var releaseMode = tl.getPathInput("releaseMode", true);
-var artifactAlias = tl.getInput("artifactAlias");
-var majorVersionVariableName = tl.getInput("majorVersionVariableName");
-var minorVersionVariableName = tl.getInput("minorVersionVariableName");
-var patchVersionVariableName = tl.getInput("patchVersionVariableName");
-var specialVersionVariableName = tl.getInput("specialVersionVariableName");
-var versionVariableName = tl.getInput("versionVariableName");
-var cdVersionVariableName = tl.getInput("cdVersionVariableName");
-var artifactName = tl.getInput("artifactName", true);
+let releaseMode = tl.getPathInput("releaseMode", true);
+let artifactAlias = tl.getInput("artifactAlias");
+let majorVersionVariableName = tl.getInput("majorVersionVariableName");
+let minorVersionVariableName = tl.getInput("minorVersionVariableName");
+let patchVersionVariableName = tl.getInput("patchVersionVariableName");
+let specialVersionVariableName = tl.getInput("specialVersionVariableName");
+let versionVariableName = tl.getInput("versionVariableName");
+let cdVersionVariableName = tl.getInput("cdVersionVariableName");
+let artifactName = tl.getInput("artifactName", true);
 
 
 // find artifact
@@ -37,10 +37,10 @@ if (artifactAlias == null || artifactAlias == "") {
   tl.getVariables().forEach((item:tl.VariableInfo) => {
     tl.debug(`Variable: '${item.name}' -> '${item.value}'`)
   })
-  var aliases =
+  let aliases =
     tl.getVariables()
     .filter((variable: tl.VariableInfo) => {
-      var lower = variable.name.trim().toLowerCase();
+      let lower = variable.name.trim().toLowerCase();
       return variable.name.startsWith("release.artifacts.") && variable.name.endsWith(".type"); })
     .map((variable: tl.VariableInfo) => { return variable.name.substr("Release.Artifacts.".length, variable.name.length - ("Release.Artifacts.".length + ".Type".length)); });
     //Object.keys(process.env)
@@ -51,9 +51,9 @@ if (artifactAlias == null || artifactAlias == "") {
     exitWithError("No suitable artifactalias to handle versioning was found.", 1);
   }
 
-  var primaryBuildId = tl.getVariable("Build.BuildID");
+  let primaryBuildId = tl.getVariable("Build.BuildID");
   if (primaryBuildId != null && primaryBuildId != "") {
-    var primaryAlias = aliases.find((alias: string) => { return tl.getVariable(`Release.Artifacts.${alias}.BuildId`) == primaryBuildId; });
+    let primaryAlias = aliases.find((alias: string) => { return tl.getVariable(`Release.Artifacts.${alias}.BuildId`) == primaryBuildId; });
     //var primaryAlias = aliases.find((alias: string) => { return process.env[`RELEASE_ARTIFACTS_${alias}_BUILDID`] == primaryBuildId; });
     artifactAlias = primaryAlias;
   } else {
@@ -64,49 +64,49 @@ if (artifactAlias == null || artifactAlias == "") {
 
 // Check if the required files exist
 // $(artefactsDir)/$(artifactAlias)/$(artifactName)/version.release.txt
-var artefactsDir = tl.getVariable("Agent.ReleaseDirectory").trim();
+let artefactsDir = tl.getVariable("Agent.ReleaseDirectory").trim();
 
 
-var versionText =         fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.txt`, "utf8");
-var versionReleaseText =  fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.release.txt`, "utf8");
+let versionText =         fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.txt`, "utf8");
+let versionReleaseText =  fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.release.txt`, "utf8");
 //var versionCiText =       fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.ci.txt`, "utf8");
 
-var specialSplits = versionText.split("-");
-var rest = "";
+let specialSplits = versionText.split("-");
+let rest = "";
 if (specialSplits.length > 1) {
   rest = "-" + specialSplits.slice(1).join("-");
 }
 
-var version = specialSplits[0].trim();
-var versionParts = version.split(".")
+let version = specialSplits[0].trim();
+let versionParts = version.split(".")
 
-var releaseVersionParts = versionReleaseText.split("-")[0].split(".");
+let releaseVersionParts = versionReleaseText.split("-")[0].split(".");
 
-var generatePatch = versionParts.length == 2;
+let generatePatch = versionParts.length == 2;
 if (versionParts.length < 2 || (!generatePatch && versionParts.length != 3)) {
   exitWithError(`The version text of the artefact is not in the correct format. Expected a file containing something similar to '${generatePatch ? "1.0" : "1.0.0" }', but got a file with '${versionText}'`, 1);
 }
 
-var majorVersion = releaseVersionParts[0].trim();
+let majorVersion = releaseVersionParts[0].trim();
 setBuildVariable(majorVersionVariableName, majorVersion);
 
-var minorVersion = releaseVersionParts[1].trim();
+let minorVersion = releaseVersionParts[1].trim();
 setBuildVariable(minorVersionVariableName, minorVersion);
 
-var patchVersion = releaseVersionParts[2].trim();
+let patchVersion = releaseVersionParts[2].trim();
 setBuildVariable(patchVersionVariableName, patchVersion);
 
 setBuildVariable(specialVersionVariableName, rest);
 
-var releaseVersion = versionReleaseText
-var cdVersion = releaseVersion
+let releaseVersion = versionReleaseText
+let cdVersion = releaseVersion
 // Now we need to be careful as the version number no longer needs to be unique as multiple releases can start with the same build...
-var externalReleaseNumber = "";
+let externalReleaseNumber = "";
 if (releaseMode == "ReleaseCandidate") {
-  var extractReleaseRevision = tl.getInput("extractReleaseRevision", true);
-  var re = new RegExp(extractReleaseRevision);
-  var releaseName = tl.getVariable("Release.ReleaseName").trim();
-  var match = releaseName.match(re);
+  let extractReleaseRevision = tl.getInput("extractReleaseRevision", true);
+  let re = new RegExp(extractReleaseRevision);
+  let releaseName = tl.getVariable("Release.ReleaseName").trim();
+  let match = releaseName.match(re);
   if (match) {
     externalReleaseNumber = match[1].trim();
   }
