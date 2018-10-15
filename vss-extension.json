@@ -2,19 +2,28 @@
     "manifestVersion": 1,
     "id": "matthid-semver-build-task",
     "name": "AIT SemVer Build Tools",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "publisher": "matthid",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
         }
-    ],    
-    "description": "Tools for using version numbers as specified by semver.org in your release pipeline. Allows to manage your version number from within your reposiory. Includes several build and release tasks.",
+    ],
+    "description": "Tools for using version numbers as specified by https://semver.org/ in your release pipeline. Allows to manage your version number from within your repository. Includes build and release tasks.",
     "categories": [
         "Build and release"
     ],
-    "icons": {   
-      "default": "extension-icon.png" 
+    "icons": {
+      "default": "extension-icon.png"
+    },
+    "repository": {
+        "type": "git",
+        "uri": "https://github.com/AITGmbH/AIT.VSTS.Versioning"
+    },
+    "links": {
+        "license": {
+            "uri": "https://github.com/AITGmbH/AIT.VSTS.Versioning/blob/master/license.txt"
+        }
     },
     "files": [
         {
