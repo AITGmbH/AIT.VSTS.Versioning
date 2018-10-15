@@ -1,4 +1,3 @@
-
 "use strict";
 
 import * as tl from "vsts-task-lib/task";
@@ -21,22 +20,6 @@ function exitWithError(message, exitCode) {
   process.exit(exitCode);
 }
 
-// http://stackoverflow.com/a/2998822/1269722
-function pad(num, size) {
-    var s = num+"";
-    while (s.length < size) s = "0" + s;
-    return s;
-}
-
-// http://stackoverflow.com/a/8619946/1269722
-function getDayOfYear() {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), 0, 0);
-  var diff = now.getTime() - start.getTime();
-  var oneDay = 1000 * 60 * 60 * 24;
-  return Math.floor(diff / oneDay);
-}
-
 tl.cd(tl.getInput("cwd"));
 
 // read inputs
@@ -56,7 +39,7 @@ if (artifactAlias == null || artifactAlias == "") {
   tl.getVariables().forEach((item:tl.VariableInfo) => {
     tl.debug(`Variable: '${item.name}' -> '${item.value}'`)
   })
-  var aliases = 
+  var aliases =
     tl.getVariables()
     .filter((variable: tl.VariableInfo) => {
       var lower = variable.name.trim().toLowerCase();
@@ -88,7 +71,7 @@ var artefactsDir = tl.getVariable("Agent.ReleaseDirectory").trim();
 
 var versionText =         fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.txt`, "utf8");
 var versionReleaseText =  fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.release.txt`, "utf8");
-var versionCiText =       fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.ci.txt`, "utf8");
+//var versionCiText =       fs.readFileSync(`${artefactsDir}/${artifactAlias}/${artifactName}/version.ci.txt`, "utf8");
 
 var specialSplits = versionText.split("-");
 var rest = "";
