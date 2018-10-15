@@ -115,7 +115,10 @@ setBuildVariable(versionVariableName, releaseVersion);
 setBuildVariable(ciVersionVariableName, ciVersion);
 
 var artifactDir = versionTextFile + ".artifact";
-fs.mkdirSync(artifactDir);
+if (!fs.existsSync(artifactDir)) {
+  fs.mkdirSync(artifactDir);
+}
+
 fs.writeFileSync(artifactDir + "/version.release.txt", releaseVersion, 'utf8');
 fs.writeFileSync(artifactDir + "/version.txt", versionText, 'utf8');
 fs.writeFileSync(artifactDir + "/version.ci.txt", ciVersion, 'utf8');
