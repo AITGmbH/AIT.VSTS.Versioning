@@ -5,12 +5,10 @@ import * as fs from "fs";
 
 function setBuildName(name) {
   tl.command("build.updatebuildnumber", {}, name)
-  //console.log("##vso[build.updatebuildnumber]%s", name);
 }
 
 function setBuildVariable(variable, value) {
   tl.setVariable(variable, value);
-  //console.log("##vso[task.setvariable variable=%s;]%s", variable, value);
   process.env[variable] = value;
 }
 
@@ -23,56 +21,57 @@ function exitWithError(message, exitCode) {
 tl.cd(tl.getInput("cwd"));
 
 // read inputs
-var versionTextFile = tl.getPathInput("versionTextFile", true);
-var generatePatch = tl.getInput("generatePatch", true) == "true";
-var majorVersionVariableName = tl.getInput("majorVersionVariableName");
-var minorVersionVariableName = tl.getInput("minorVersionVariableName");
-var patchVersionVariableName = tl.getInput("patchVersionVariableName");
-var maxPatchVersion = Number.parseInt(tl.getInput("maxPatchVersion"));
-var specialVersionVariableName = tl.getInput("specialVersionVariableName");
-var versionVariableName = tl.getInput("versionVariableName");
-var ciVersionVariableName = tl.getInput("ciVersionVariableName");
-var artifactName = tl.getInput("artifactName", true);
+let versionTextFile = tl.getPathInput("versionTextFile", true);
+let generatePatch = tl.getInput("generatePatch", true) == "true";
+let majorVersionVariableName = tl.getInput("majorVersionVariableName");
+let minorVersionVariableName = tl.getInput("minorVersionVariableName");
+let patchVersionVariableName = tl.getInput("patchVersionVariableName");
+let maxPatchVersion = Number.parseInt(tl.getInput("maxPatchVersion"));
+let specialVersionVariableName = tl.getInput("specialVersionVariableName");
+let versionVariableName = tl.getInput("versionVariableName");
+let ciVersionVariableName = tl.getInput("ciVersionVariableName");
+let artifactName = tl.getInput("artifactName", true);
 
-var versionText = fs.readFileSync(versionTextFile, "utf8").trim();
+let versionText = fs.readFileSync(versionTextFile, "utf8").trim();
 
-var specialSplits = versionText.split("-");
-var rest = "";
+let specialSplits = versionText.split("-");
+let rest = "";
 if (specialSplits.length > 1) {
   rest = "-" + specialSplits.slice(1).join("-").trim();
 }
 
-var version = specialSplits[0];
-var versionParts = version.split(".")
+let version = specialSplits[0];
+let versionParts = version.split(".")
 
 if (versionParts.length < 2) {
   exitWithError(`The file ${versionTextFile} is not in the correct format. Expected a file containing something similar to '1.0.0' or '1.0' (when generating patch numbers)`, 1);
 }
 
-var majorVersion = versionParts[0].trim();
+let majorVersion = versionParts[0].trim();
 setBuildVariable(majorVersionVariableName, majorVersion);
 
-var minorVersion = versionParts[1].trim();
+let minorVersion = versionParts[1].trim();
 setBuildVariable(minorVersionVariableName, minorVersion);
 
 // Get some externally unique ID
-var externalBuildNumber = "";
+let externalBuildNumber = "";
 // get BUILD_BUILDNUMBER (see https://www.visualstudio.com/en-us/docs/build/define/variables)
-var buildNumber = tl.getVariable("Build.BuildNumber").trim();
-if (buildNumber != null && (buildNumber!="")) {
+
+let buildId = tl.getVariable("Build.BuildId").trim();
+let buildNumber = tl.getVariable("Build.BuildNumber").trim();
+externalBuildNumber = buildId;
+if (externalBuildNumber == null || (externalBuildNumber == "")) {
+  tl.warning("using Build.BuildNumber as patch number, because Build.BuildId was empty.")
   externalBuildNumber = buildNumber;
-} else {
-  tl.warning("using Build.BuildId as patch number, because Build.BuildNumber was empty.")
-  var buildId = tl.getVariable("Build.BuildId").trim();
-  if (buildNumber == null || (buildNumber=="")) {
+  if (externalBuildNumber == null || (externalBuildNumber=="")) {
     exitWithError("Could not find Build.BuildNumber or Build.BuildId so no patch number could be generated!", 2);
   }
-  externalBuildNumber = buildId;
 }
 
-var draft = buildNumber.endsWith(".DRAFT")? ".DRAFT": "";
 
-var unwrappedPatchVersionNumber : number;
+let draft = buildNumber.endsWith(".DRAFT")? ".DRAFT": "";
+
+let unwrappedPatchVersionNumber : number;
 if (generatePatch) {
   if (versionParts.length > 2) {
     exitWithError(`The file ${versionTextFile} is not in the correct format. Expected a file containing something similar to '1.0' (because patch part is generated)`, 1);
@@ -87,34 +86,37 @@ if (generatePatch) {
   unwrappedPatchVersionNumber = Number.parseInt(versionParts[2].trim());
 }
 
-var unwrappedPatchVersion = unwrappedPatchVersionNumber.toString();
+let unwrappedPatchVersion = unwrappedPatchVersionNumber.toString();
 
-var patchVersionNumber = maxPatchVersion === null || Number.isNaN(maxPatchVersion) ?
+let patchVersionNumber = maxPatchVersion === null || Number.isNaN(maxPatchVersion) ?
                           unwrappedPatchVersionNumber :
                           unwrappedPatchVersionNumber % (1 + maxPatchVersion);
-var patchVersion = patchVersionNumber.toString();
+let patchVersion = patchVersionNumber.toString();
 
 setBuildVariable(patchVersionVariableName, patchVersion);
 
 setBuildVariable(specialVersionVariableName, rest);
 
-var releaseVersion = `${majorVersion}.${minorVersion}.${patchVersion}${rest}`
-var ciVersion = `${majorVersion}.${minorVersion}.${patchVersion}-ci`
+let releaseVersion = `${majorVersion}.${minorVersion}.${patchVersion}${rest}`
+let ciVersion = `${majorVersion}.${minorVersion}.${patchVersion}-ci`
 if (generatePatch) {
   // We are already unique if not wrapped around, because of patchVersion
-  if (patchVersionNumber !== unwrappedPatchVersionNumber)
-  {
+  if (patchVersionNumber !== unwrappedPatchVersionNumber) {
     ciVersion = `${ciVersion}-${unwrappedPatchVersion}`
   }
 } else {
   // We need to improve ciVersion as we might not update the text file on every build
-  ciVersion = `${ciVersion}-${externalBuildNumber}`
+  if (buildNumber == null || (buildNumber == "")) {
+    ciVersion = `${ciVersion}`
+  } else {
+    ciVersion = `${ciVersion}-${buildNumber}`
+  }
 }
 
 setBuildVariable(versionVariableName, releaseVersion);
 setBuildVariable(ciVersionVariableName, ciVersion);
 
-var artifactDir = versionTextFile + ".artifact";
+let artifactDir = versionTextFile + ".artifact";
 if (!fs.existsSync(artifactDir)) {
   fs.mkdirSync(artifactDir);
 }
@@ -132,6 +134,9 @@ let data = {
 };
 
 tl.command("artifact.upload", data, artifactDir);
+let buildName = `${ciVersion}`;
+if (generatePatch) {
+  buildName = `${ciVersion}${draft}`;
+}
 
-var buildName = `${ciVersion}${draft}`;
 setBuildName(buildName);

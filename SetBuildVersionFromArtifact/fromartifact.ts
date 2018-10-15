@@ -5,12 +5,10 @@ import * as fs from "fs";
 
 function addBuildTag(name) {
   tl.command("build.addbuildtag", {}, name)
-  //console.log("##vso[build.updatebuildnumber]%s", name);
 }
 
 function setBuildVariable(variable, value) {
   tl.setVariable(variable, value);
-  //console.log("##vso[task.setvariable variable=%s;]%s", variable, value);
   process.env[variable] = value;
 }
 
