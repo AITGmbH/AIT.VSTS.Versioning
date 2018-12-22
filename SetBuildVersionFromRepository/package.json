@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "vsts-task-lib": "^2.0.2-preview"
+    "azure-pipelines-task-lib": "^2.7.7"
   },
   "scripts": {
     "tsc": "tsc"
