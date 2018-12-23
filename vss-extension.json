@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "matthid-semver-build-task",
     "name": "AIT SemVer Build Tools",
-    "version": "0.2.14",
+    "version": "1.2.14",
     "publisher": "matthid",
     "targets": [
         {
@@ -11,7 +11,7 @@
     ],
     "description": "Tools for using version numbers as specified by https://semver.org/ in your release pipeline. Allows to manage your version number from within your repository. Includes build and release tasks.",
     "categories": [
-        "Build and release"
+        "__ExtensionCategory__"
     ],
     "icons": {
       "default": "extension-icon.png"
