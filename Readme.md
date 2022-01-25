@@ -1,5 +1,7 @@
 # AIT.VSTS.Versioning
 
+__! This project wil go into an archived status and will no longer be maintained !__
+
 Versioning helpers to version your software by editing a version file in your repository.
 This allows you to track your [semantic versioning](https://semver.org) while doing changes and has the following benefits:
 
